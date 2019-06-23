@@ -1,0 +1,119 @@
+---
+title: "Case Study 1"
+author: "Ben Tanaka"
+date: "6/22/2019"
+output: 
+  html_document:
+    keep_md: true
+---
+
+# **Introduction**
+** Enter introduction 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("/users/ben/documents/r/Case_Study_1")
+getwd()
+
+library(xml2)
+library(rvest)
+library(stringr)
+library(tibble)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+
+## Step 1:  Import of data sets
+* This will import the two data sets Beers.csv and Breweries csv and view the first 5 lines of the data in order to determine how to join the two data sets.  When doing a quick view of the two data sets it appears that both have headers in the first row the the separator is using a comma.  Beers.csv will be imported as df_Beers and Breweries will be imported as df_breweries.  This will also output the table.
+
+```{r Import and Review}
+df_Beers <- read.csv(file="beers.csv", header=TRUE, sep=",")
+df_Breweries <- read.csv(file="breweries.csv", header=TRUE, sep=",")
+head(df_Beers)
+head(df_Breweries)
+```
+
+## Exactly how many breweries are present in each state
+* This step will take the df_breweries data frame and count by the states as well as rename the columns
+``` {r Q1}
+df_Breweries_by_State <- df_Breweries %>% group_by(State) %>% tally( sort=TRUE)
+setnames(df_Breweries_by_State,old=c("n"),new=c("Breweries_CNTS"))
+
+{df_Breweries_by_State %>% kable() %>% kable_styling()}
+```
+
+* Colorado has the most breweries out of all of the states.  Seems the Water there is great for brewing beer, that or people on Colorado love their beer. 
+
+## Beers and their Associated Breweries
+* After reviewing the two data sets it appears that Brew_ID (df_Breweries) and Brewery_ID (df_Beers).  This step will merge the two tables together using the common IDs.  First we will change the name of the Brew_ID to a common name to both tables (Brewery_ID).  We also want to change the names of the columns so that they are human readable.
+
+```{r Q2}
+setnames(df_Breweries,old=c("Brew_ID"),new=c("Brewery_id"))
+df_Beers_Breweries <- merge(df_Beers,df_Breweries, by=c("Brewery_id"))
+
+setnames(df_Beers_Breweries,old=c("Name.x","Name.y"),new=c("Beer_Name","Brewery_Name"))
+
+df_First_Six <- head(df_Beers_Breweries,6)
+df_Last_Six <- tail(df_Beers_Breweries,6)
+
+{df_First_Six %>% kable() %>% kable_styling()}
+{df_Last_Six %>% kable() %>% kable_styling()}
+```
+
+## How many missing observations are there by column
+*  This will show the number of observations in each column
+``` {r Q3}
+df_Missing_Obs <- colSums(is.na(df_Beers_Breweries))
+
+{df_Missing_Obs %>% kable() %>% kable_styling()}
+```
+
+*  IBU has the most missing values out of all of the columnes, followed by ABV.  These are actually the only two columns that have missing data.
+
+## What is the median Alcohol Content & International Bitterness Unit for each state
+* This will group the and summarise the median for ABV & IBU as well as plot the results in decending order
+
+``` {r Q4}
+df_ABV_by_State <- df_Beers_Breweries %>% group_by(State) %>% summarise(Median=median(ABV,na.rm=TRUE))
+df_IBU_by_State <- df_Beers_Breweries %>% group_by(State) %>% summarise(Median=median(IBU,na.rm=TRUE))
+
+
+ggplot(df_ABV_by_State, aes(x=reorder(df_ABV_by_State$State,-df_ABV_by_State$Median), y=df_ABV_by_State$Median, fill=df_ABV_by_State$State)) + geom_bar (stat="identity") + xlab("State") + ylab("Median Alcohol by State") + ggtitle("Median Alcholol content by State")  + theme(plot.title = element_text(hjust=.5))+theme(axis.text.x=element_text(angle=90)) + scale_color_gradientn(colours=rainbow(20)) + theme(legend.position="none")
+
+ggplot(df_IBU_by_State, aes(x=reorder(df_IBU_by_State$State,-df_IBU_by_State$Median), y=df_IBU_by_State$Median, fill=df_IBU_by_State$State)) + geom_bar (stat="identity") + xlab("State") + ylab("Median International Bitterness Unit") + ggtitle("Median International Bitterness Unit by State")  + theme(plot.title = element_text(hjust=.5))+theme(axis.text.x=element_text(angle=90)) + scale_color_gradientn(colours=rainbow(20)) + theme(legend.position="none")
+```
+
+*  Alcohol content did not vary much state by state whereas IBU did have some variation.
+
+## States with the Maximum ABV and IBU?
+*  The District of Columbia has the highest median for alochol content whereas Maine has the highest IBU.  
+
+##  Summary statistics for ABV
+*  This will show the summary statistics for ABV
+``` {r q6}
+
+summary(df_Beers$ABV,na.rm=TRUE)
+
+```
+
+*  The maximum ABV came to be .128 and the lowest was .00100.  I am not sure what the point of drinking that beer would be.
+
+## Relationship between ABV and IBU
+* This will plot IBU and ABV in a scatter plot
+
+``` {r q7}
+
+plot(df_Beers$ABV,df_Beers$IBU, main="ABV & IBU Relationships", xlab="ABV",ylab="IBU",pch=19,frame=FALSE)
+
+```
+
+*  There seems to be a relationship between ABV and IBU, in which, the less alcohol content there is the less bitter the beer.  
+
+# ** Conclusion ** 
+
+* What is the conclusion of the study.
