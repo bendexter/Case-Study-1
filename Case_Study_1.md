@@ -8,7 +8,7 @@ output:
 ---
 
 # **Introduction**
-** Enter introduction 
+** This code is to conduct an anlaysis and relationships of beer itself as well as the breweries that make the beer.  This code will look at the alcohol content and bitterness units of each beer to compare them with the states, and breweries that make the beer.  We will look at what states have the most breweries as well as what is the median ABV and IBU content and the relationship between the two.
 
 
 
@@ -605,8 +605,40 @@ plot(df_Beers$ABV,df_Beers$IBU, main="ABV & IBU Relationships", xlab="ABV",ylab=
 
 ![](Case_Study_1_files/figure-html/q7-1.png)<!-- -->
 
+
+##  This calculates the adj r squared to determine the strength of the relationship between ABV and IBU
+
+```r
+df_ibu_abv=data.frame(df_Beers_Breweries$ABV,df_Beers_Breweries$IBU)
+reg=lm(df_Beers_Breweries.ABV~df_Beers_Breweries.IBU,data=df_ibu_abv)
+summary(reg)
+```
+
+```
+## 
+## Call:
+## lm(formula = df_Beers_Breweries.ABV ~ df_Beers_Breweries.IBU, 
+##     data = df_ibu_abv)
+## 
+## Residuals:
+##       Min        1Q    Median        3Q       Max 
+## -0.033288 -0.005946 -0.001595  0.004022  0.052006 
+## 
+## Coefficients:
+##                         Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)            4.493e-02  5.177e-04   86.79   <2e-16 ***
+## df_Beers_Breweries.IBU 3.508e-04  1.036e-05   33.86   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.01007 on 1403 degrees of freedom
+##   (1005 observations deleted due to missingness)
+## Multiple R-squared:  0.4497,	Adjusted R-squared:  0.4493 
+## F-statistic:  1147 on 1 and 1403 DF,  p-value: < 2.2e-16
+```
+
 *  There seems to be a relationship between ABV and IBU, in which, the less alcohol content there is the less bitter the beer.  
 
 # ** Conclusion ** 
 
-* What is the conclusion of the study.
+* Although there is a cluster of observations showing some correlation between ABV and IBU however the relantionship on the weaker side.  This contends to the variation noticed in the IBU data where there is a lot of "noise" in the data as breweries will tend to make their beer based on consumer demands which would include what type of ingredients are used during the brewing process.
